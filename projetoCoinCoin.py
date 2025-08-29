@@ -332,6 +332,28 @@ def iniciar_conexao():
             print(f"❌ Falha ao conectar em {ip}. Iniciando como COORDENADOR.")
             return menu_login()
 
+def menu_conectar():
+    """Permite ao usuário se conectar a outro nó da rede."""
+    print("\n=== CONECTAR A OUTRO NÓ ===")
+    ip = input("Digite o endereço IP do nó para se conectar: ").strip()
+    
+    if not ip:
+        print("❌ Operação cancelada.")
+        return
+
+    try:
+        porta_str = input(f"Digite a porta de {ip}: ")
+        porta_destino = int(porta_str)
+        
+        # Chama a função de conexão com o IP e a porta fornecidos
+        if conectar_por_ip(ip, porta_destino, meu_usuario_logado):
+            print("✅ Solicitação de conexão enviada! Aguardando confirmação.")
+        else:
+            print("❌ Falha na conexão.")
+    except ValueError:
+        print("❌ Porta inválida.")
+    except Exception as e:
+        print(f"❌ Ocorreu um erro ao tentar conectar: {e}")
 
 def enviar_mensagem():
     """Thread para enviar mensagens, com menu de opções e listagem de usuários."""
@@ -424,7 +446,10 @@ def enviar_mensagem():
             # Sair
             print("Encerrando sistema...")
             break
-            
+        
+        elif opcao == "6": # Chama o novo menu de conexão
+            menu_conectar()
+
         else:
             print("Opção inválida. Tente novamente.")
 
