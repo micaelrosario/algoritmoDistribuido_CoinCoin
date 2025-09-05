@@ -24,10 +24,10 @@ usuarios_senhas = {                # Usuários e senhas fixos
 transacoes_confirmadas = []        # Histórico de transações (strings com timestamp legível)
 
 # ================================
-# Estado de cluster distribuído
+# Estado de hosts e ip distribuído
 # ================================
-maquinas = set()                   # Conjunto de IPs participantes do sistema
-meu_ip = None                       # IP local desta máquina
+maquinas = set()     # IPs participantes do sistema
+meu_ip = None                       
 
 # Relógio lógico de Lamport
 relogio_lamport = 0
@@ -40,12 +40,9 @@ ra_adicionados_posteriormente = set()  # Conjunto de IPs que ficaram pendentes
 ra_evento = threading.Event()      # Sinaliza quando todas as réplicas aprovaram
 
 # Berkeley (ajuste de relógio físico "virtual")
-deslocamento_relogio = 0.0         # Offset em segundos aplicado a time.time()
+deslocamento_relogio = 0.0        
 
-# ================================
-# Sincronização local
-# ================================
-trava = threading.Lock()           # Protege estados locais (saldo, histórico, lista, Lamport etc.)
+trava = threading.Lock()  # Protege estados locais (saldo, histórico, lista, Lamport etc.)
 
 usuario_logado = None
 
@@ -64,14 +61,14 @@ def obter_ip_local():
         return socket.gethostbyname(socket.gethostname())
 
 def agora_legivel():
-    """Timestamp legível (para logs e histórico)."""
+    """Timestamp Formatado (para logs e histórico)."""
     return time.strftime("%Y-%m-%d %H:%M:%S")
 
 def incrementar_lamport_evento():
-    """Incrementa Lamport em evento local e retorna valor."""
+    """Incrementa Lamport e retorna valor do relógio ."""
     global relogio_lamport
     with trava:
-        relogio_lamport += 1
+        relogio_lamport += 1 # Incrementa em 1 
         return relogio_lamport
 
 def atualizar_lamport_recebido(ts_msg):
@@ -87,7 +84,7 @@ def tempo_virtual():
         return time.time() + deslocamento_relogio
 
 def sou_coordenador():
-    """Coordenador do Berkeley = primeiro IP (ordem lexicográfica) da lista."""
+    """Coordenador do Berkeley = primeiro IP da lista."""
     with trava:
         if not maquinas:
             return False
@@ -114,7 +111,7 @@ def enviar_mensagem_tcp(ip, mensagem_sem_ts):
         print(f"[TCP] Falha ao enviar para {ip}: {e}")
 
 def broadcast_tcp(mensagem_sem_ts, excluir=None):
-    """Envia para todos da lista de máquinas (exceto self e excluir)."""
+    """Envia para todos da lista de máquinas (exceto a si mesmo)."""
     with trava:
         destinos = list(maquinas)
     for ip in destinos:
